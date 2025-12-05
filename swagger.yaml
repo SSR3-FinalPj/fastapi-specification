@@ -1,0 +1,423 @@
+openapi: 3.1.0
+info:
+  title: FastAPI
+  version: 0.1.0
+paths:
+  /chat/{user_id}:
+    post:
+      summary: Save Chat
+      operationId: save_chat_chat__user_id__post
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: User Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/ChatMessage"
+              title: Messages
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MongoChatWriteResponse"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+        "500":
+          description: mongoDB 작업중 문제 발생
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MongoChatWriteResponseError"
+    get:
+      summary: Get Chat
+      operationId: get_chat_chat__user_id__get
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: User Id
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MongoChatResponse"
+        "404":
+          description: 조회된 값 없음
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MongoChatResponseError"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+        "500":
+          description: mongoDB 작업중 문제 발생
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MongoChatResponseError"
+  /chat/{user_id}/add:
+    post:
+      summary: Add Message
+      operationId: add_message_chat__user_id__add_post
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: User Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatMessage"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MongoChatWriteResponse"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+        "500":
+          description: mongoDB 작업중 문제 발생
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MongoChatWriteResponseError"
+  /generate:
+    post:
+      summary: Generate Text
+      operationId: generate_text_generate_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LLMRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LLMResponse"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+        "500":
+          description: 요청작업 중 문제 발생
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LLMResponseError"
+        "502":
+          description: llm요청 중 bad gateway
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LLMResponseError"
+  /generate-stream:
+    post:
+      summary: Generate Text Stream
+      operationId: generate_text_stream_generate_stream_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LLMRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /get-etiquette:
+    post:
+      summary: Get Etiquette
+      operationId: get_etiquette_get_etiquette_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EtiquetteRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LLMResponse"
+        "404":
+          description: 해당 내용 없음
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LLMResponseError"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+        "500":
+          description: 요청작업 중 문제 발생
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LLMResponseError"
+  /get-etiquette-choice:
+    post:
+      summary: Get Etiquette Choice
+      operationId: get_etiquette_choice_get_etiquette_choice_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EtiquetteChoiceRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+      deprecated: true
+  /health:
+    get:
+      summary: Health
+      operationId: health_health_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+components:
+  schemas:
+    ChatMessage:
+      properties:
+        role:
+          type: string
+          title: Role
+        message:
+          type: string
+          title: Message
+      type: object
+      required:
+        - role
+        - message
+      title: ChatMessage
+    EtiquetteChoiceRequest:
+      properties:
+        prompt:
+          type: string
+          title: Prompt
+      type: object
+      required:
+        - prompt
+      title: EtiquetteChoiceRequest
+    EtiquetteRequest:
+      properties:
+        prompt:
+          type: string
+          title: Prompt
+        place:
+          type: string
+          title: Place
+      type: object
+      required:
+        - prompt
+        - place
+      title: EtiquetteRequest
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: "#/components/schemas/ValidationError"
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    LLMRequest:
+      properties:
+        prompt:
+          type: string
+          title: Prompt
+        chat_history:
+          items: {}
+          type: array
+          title: Chat History
+        lora:
+          type: string
+          title: Lora
+      type: object
+      required:
+        - prompt
+        - lora
+      title: LLMRequest
+    LLMResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+        text:
+          type: string
+          title: Text
+        status_code:
+          type: integer
+          title: Status Code
+      type: object
+      required:
+        - success
+        - text
+        - status_code
+      title: LLMResponse
+    LLMResponseError:
+      properties:
+        success:
+          type: boolean
+          title: Success
+        status_code:
+          type: integer
+          title: Status Code
+        error_msg:
+          type: string
+          title: Error Msg
+      type: object
+      required:
+        - success
+        - status_code
+        - error_msg
+      title: LLMResponseError
+    MongoChatResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+        status_code:
+          type: integer
+          title: Status Code
+        result:
+          items: {}
+          type: array
+          title: Result
+      type: object
+      required:
+        - success
+        - status_code
+        - result
+      title: MongoChatResponse
+    MongoChatResponseError:
+      properties:
+        success:
+          type: boolean
+          title: Success
+        status_code:
+          type: integer
+          title: Status Code
+        error_msg:
+          type: string
+          title: Error Msg
+      type: object
+      required:
+        - success
+        - status_code
+        - error_msg
+      title: MongoChatResponseError
+    MongoChatWriteResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+        status_code:
+          type: integer
+          title: Status Code
+      type: object
+      required:
+        - success
+        - status_code
+      title: MongoChatWriteResponse
+    MongoChatWriteResponseError:
+      properties:
+        success:
+          type: boolean
+          title: Success
+        status_code:
+          type: integer
+          title: Status Code
+        error_msg:
+          type: string
+          title: Error Msg
+      type: object
+      required:
+        - success
+        - status_code
+        - error_msg
+      title: MongoChatWriteResponseError
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      title: ValidationError
